@@ -1,0 +1,12 @@
+[
+    "What is the main plot of the first Harry Potter book?",
+    "Who are the main characters in Harry Potter and the Philosopher's Stone?",
+    "What is the significance of the Sorting Hat in Harry Potter?",
+    "How does Harry Potter discover he is a wizard?",
+    "What are the key differences between the book and movie versions of Harry Potter and the Philosopher's Stone?",
+    "What role does Albus Dumbledore play in the first Harry Potter book?",
+    "How does J.K. Rowling develop the magical world in Harry Potter and the Philosopher's Stone?",
+    "What are the main themes in Harry Potter and the Philosopher's Stone?",
+    "How does the relationship between Harry, Ron, and Hermione develop in the first book?",
+    "What challenges does Harry face in his first year at Hogwarts?"
+]
