@@ -23,7 +23,7 @@ def scalar_quantization(input_vector: List[float], quantization_type=np.uint8) -
     min_vals = np.min(input_vector, axis=0)
     max_vals = np.max(input_vector, axis=0)
 
-    print(min_vals, max_vals)
+    # print(min_vals, max_vals)
 
     # Calculate scaling factor and zero point for each dimension
     scaling_factors = (max_vals - min_vals) / 255.0
@@ -42,19 +42,23 @@ def binary_quantization(input_vector: List[float]) -> List[int]:
     return binary_embeddings.tolist()
 
 
-vector_response = fetch_embeddings(
-    query_text="I am doing hard research on the quantization techniques in embeddings and LLM weights "
-               "and its impact on hallucination")
+def get_py_embeddings(text, quantization="scalar"):
+    embeddings = fetch_embeddings(text)
+    if quantization == "scalar":
+        return scalar_quantization(embeddings['embedding'])
+    elif quantization == "binary":
+        return binary_quantization(embeddings['embedding'])
+    else:
+        return embeddings['embedding']
 
-embedding = vector_response['embedding']
-print('Original Vector:')
-print(vector_response['embedding'])
 
-scalar_quantized_vector = scalar_quantization(
-    input_vector=embedding, quantization_type=np.uint16)
-print('\nScalar Quantized Vector:')
-print(scalar_quantized_vector)
+if __name__ == "__main__":
+    scalar_vector_response = get_py_embeddings(text="I am doing hard research on the quantization techniques in embeddings and LLM weights "
+                                               "and its impact on hallucination", quantization="scalar")
 
-binary_quantized_vector = binary_quantization(input_vector=embedding)
-print('\nBinary Quantized Vector:')
-print(binary_quantized_vector)
+    print(scalar_vector_response)
+    print("=" * 50)
+    binary_vector_response = get_py_embeddings(text="I am doing hard research on the quantization techniques in embeddings and LLM weights "
+                                               "and its impact on hallucination", quantization="binary")
+    print(binary_vector_response)
+    print("=" * 50)

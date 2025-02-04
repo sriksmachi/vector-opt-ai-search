@@ -15,28 +15,26 @@ from azure.search.documents.indexes.models import (
     ScalarQuantizationCompression,
     BinaryQuantizationCompression,
     VectorSearchCompression,
-    VectorSearchAlgorithmKind,
-    HnswParameters,
-    VectorSearchAlgorithmMetric,
-    VectorEncodingFormat
+    ScalarQuantizationParameters,
 )
 
 
-def upload_documents(index, document_id, document_text):
-    documents = [
-        {
-            "id": document_id,
-            "title": document_id,
-            "chunk": document_text,
-            "embedding": fetch_embeddings(document_text)["embedding"]
-        }
-    ]
-    index.upload_documents(documents)
-
-
-def create_index(index_name, dimensions, use_scalar_compression=False, use_binary_compression=False, vector_type="Collection(Edm.Single)",
+# Create an index with the given parameters
+def create_index(index_name, dimensions,
+                 use_scalar_compression=False,
+                 use_binary_compression=False,
+                 use_float16=False,
                  use_stored=True,
-                 truncation_dimension=None):
+                 use_truncation=False,
+                 use_oversampling_reranking=False,
+                 use_hf_embeddings=False,
+                 use_py_embeddings=False
+                 ):
+
+    if use_float16:
+        vector_type = "Collection(Edm.Half)"
+    else:
+        vector_type = "Collection(Edm.Single)"
 
     # Vector fields that aren't stored can never be returned in the response
     fields = [
@@ -50,23 +48,59 @@ def create_index(index_name, dimensions, use_scalar_compression=False, use_binar
 
     compression_configurations: List[VectorSearchCompression] = []
 
-    if use_scalar_compression:
-        compression_name = "myCompression"
+    if use_scalar_compression and not use_oversampling_reranking:
+        compression_name = "scalar_compression"
         compression_configurations = [
             ScalarQuantizationCompression(
-                compression_name=compression_name, truncation_dimension=truncation_dimension)
+                compression_name=compression_name,
+                kind="scalarQuantization",
+                parameters={"quantizedDataType": "int8"}
+            )
         ]
-
-    elif use_binary_compression:
-        compression_name = "myCompression"
+    elif use_truncation:
+        compression_params = {
+            "compression_name": f"truncation-compression",
+        }
+        compression_name = "truncation"
+        compression_configurations = [
+            ScalarQuantizationCompression(
+                parameters=ScalarQuantizationParameters(
+                    quantized_data_type="int8"
+                ),
+                **compression_params)
+        ]
+    elif use_binary_compression and not use_oversampling_reranking:
+        compression_name = "binary_compression"
         compression_configurations = [
             BinaryQuantizationCompression(
-                compression_name=compression_name, truncation_dimension=truncation_dimension)
+                compression_name=compression_name,
+                kind="binaryQuantization"
+            )
         ]
+    elif use_scalar_compression and use_oversampling_reranking:
+        compression_name = "oversampling_reranking"
+        compression_configurations = [
+            ScalarQuantizationCompression(
+                compression_name=compression_name,
+                default_oversampling=10,
+                rerank_with_original_vectors=True
+            )
+        ]
+    elif use_binary_compression and use_oversampling_reranking:
+        compression_name = "oversampling_reranking"
+        compression_configurations = [
+            BinaryQuantizationCompression(
+                compression_name=compression_name,
+                default_oversampling=10,
+                rerank_with_original_vectors=True
+            )
+        ]
+    elif use_hf_embeddings or use_py_embeddings:
+        compression_name = None
+        compression_configurations = []
     else:
         compression_name = None
         compression_configurations = []
-
     vector_search = VectorSearch(
         algorithms=[
             HnswAlgorithmConfiguration(name="myHnsw")
