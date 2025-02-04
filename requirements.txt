@@ -5,3 +5,5 @@ openai
 langchain-text-splitters
 ragas
 sentence-transformers
+matplotlib
+mercury

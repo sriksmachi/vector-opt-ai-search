@@ -13,12 +13,6 @@ indexes_config = {
     "no-stored": {
         "use_stored": False
     },
-    "scalar-compresssion": {
-        "use_scalar_compression": True,
-    },
-    "binary-compression": {
-        "use_binary_compression": True,
-    },
     "all-options-with-scalar": {
         "use_scalar_compression": True,
         "use_float16": True,
