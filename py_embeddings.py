@@ -1,6 +1,7 @@
 from typing import List
 import requests
 import numpy as np
+from hf_embeddings import get_hf_embeddings
 
 
 def fetch_embeddings(query_text: str) -> dict:
@@ -26,7 +27,7 @@ def scalar_quantization(input_vector: List[float], quantization_type=np.uint8) -
     # print(min_vals, max_vals)
 
     # Calculate scaling factor and zero point for each dimension
-    scaling_factors = (max_vals - min_vals) / 255.0
+    scaling_factors = (max_vals - min_vals) / 127.0
     zero_points = -min_vals / scaling_factors
 
     # Quantize the embeddings
@@ -38,16 +39,16 @@ def scalar_quantization(input_vector: List[float], quantization_type=np.uint8) -
 
 def binary_quantization(input_vector: List[float]) -> List[int]:
     # Convert embeddings to -1 or 1 based on their sign
-    binary_embeddings = np.where(np.array(input_vector) >= 0, 1, -1)
+    binary_embeddings = np.where(np.array(input_vector) >= 0, 1, 0)
     return binary_embeddings.tolist()
 
 
 def get_py_embeddings(text, quantization="scalar"):
-    embeddings = fetch_embeddings(text)
+    embeddings = get_hf_embeddings(text)
     if quantization == "scalar":
-        return scalar_quantization(embeddings['embedding'])
+        return scalar_quantization(embeddings)
     elif quantization == "binary":
-        return binary_quantization(embeddings['embedding'])
+        return binary_quantization(embeddings)
     else:
         return embeddings['embedding']
 

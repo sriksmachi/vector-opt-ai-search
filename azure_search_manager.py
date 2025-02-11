@@ -16,6 +16,9 @@ from azure.search.documents.indexes.models import (
     BinaryQuantizationCompression,
     VectorSearchCompression,
     ScalarQuantizationParameters,
+    VectorEncodingFormat,
+    VectorSearchAlgorithmMetric,
+    HnswParameters
 )
 
 
@@ -28,13 +31,21 @@ def create_index(index_name, dimensions,
                  use_truncation=False,
                  use_oversampling_reranking=False,
                  use_hf_embeddings=False,
-                 use_py_embeddings=False
+                 use_py_embeddings=False,
+                 use_sbyte=False,
+                 use_byte=False
                  ):
 
     if use_float16:
         vector_type = "Collection(Edm.Half)"
     else:
         vector_type = "Collection(Edm.Single)"
+
+    if use_sbyte:
+        vector_type = "Collection(Edm.SByte)"
+
+    if use_byte:
+        vector_type = "Collection(Edm.Byte)"
 
     # Vector fields that aren't stored can never be returned in the response
     fields = [
@@ -43,7 +54,12 @@ def create_index(index_name, dimensions,
         SearchField(name="title", type=SearchFieldDataType.String),
         SearchField(name="chunk", type=SearchFieldDataType.String),
         SearchField(name="embedding", type=vector_type, searchable=True, stored=use_stored,
-                    vector_search_dimensions=dimensions, vector_search_profile_name="myHnswProfile")
+                    vector_search_dimensions=dimensions,
+                    vector_search_profile_name="myHnswProfile",
+                    vector_encoding_format=(
+                        VectorEncodingFormat.PACKED_BIT if use_byte else None
+                    )
+                    )
     ]
 
     compression_configurations: List[VectorSearchCompression] = []
@@ -54,20 +70,18 @@ def create_index(index_name, dimensions,
             ScalarQuantizationCompression(
                 compression_name=compression_name,
                 kind="scalarQuantization",
-                parameters={"quantizedDataType": "int8"}
+                parameters={
+                    "quantizedDataType": "int8"
+                }
             )
         ]
     elif use_truncation:
-        compression_params = {
-            "compression_name": f"truncation-compression",
-        }
         compression_name = "truncation"
         compression_configurations = [
             ScalarQuantizationCompression(
-                parameters=ScalarQuantizationParameters(
-                    quantized_data_type="int8"
-                ),
-                **compression_params)
+                compression_name=compression_name,
+                truncation_dimension=1024,
+            )
         ]
     elif use_binary_compression and not use_oversampling_reranking:
         compression_name = "binary_compression"
@@ -97,13 +111,23 @@ def create_index(index_name, dimensions,
         ]
     elif use_hf_embeddings or use_py_embeddings:
         compression_name = None
-        compression_configurations = []
+        compression_configurations = [
+
+        ]
     else:
         compression_name = None
         compression_configurations = []
     vector_search = VectorSearch(
         algorithms=[
-            HnswAlgorithmConfiguration(name="myHnsw")
+            HnswAlgorithmConfiguration(
+                name="myHnsw",
+                parameters=HnswParameters(
+                    metric=(
+                        VectorSearchAlgorithmMetric.HAMMING
+                        if use_byte
+                        else VectorSearchAlgorithmMetric.COSINE
+                    )
+                ))
         ],
         profiles=[
             VectorSearchProfile(

@@ -36,12 +36,14 @@ indexes_config = {
         "use_stored": False,
     },
     "hf_embeddings": {
-        "use_hf_embeddings": True
+        "use_hf_embeddings": True,
     },
     "py_embeddings_scalar": {
         "use_py_embeddings": True,
+        "use_sbyte": True,
     },
     "py_embeddings_binary": {
         "use_py_embeddings": True,
+        "use_byte": True,
     },
 }

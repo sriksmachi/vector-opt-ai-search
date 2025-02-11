@@ -15,6 +15,7 @@ load_dotenv(override=True)
 azure_openai_embedding_dimensions = 3072
 hf_embedding_dimensions = 384
 py_embedding_dimensions = 1024
+py_embedding_dimensions_packedbit = 3072
 
 # Load environment variables
 search_service_endpoint = os.environ["AZURE_SEARCH_ENDPOINT"]
@@ -51,7 +52,7 @@ def get_embeddings(text):
         list: A list of embeddings for the input text.
     """
     response = openai_client.embeddings.create(
-        input=text, model=embedding_model_name, dimensions=azure_openai_embedding_dimensions)
+        input=text, model=embedding_model_name)
     return response.data[0].embedding
 
 
@@ -67,8 +68,10 @@ def create_indexes(indexes, base_index_name):
         dimensions = azure_openai_embedding_dimensions
         if index == "hf_embeddings":
             dimensions = hf_embedding_dimensions
-        if index == "py_embeddings_scalar" or index == "py_embeddings_binary":
+        if index == "py_embeddings_scalar":
             dimensions = py_embedding_dimensions
+        if index == "py_embeddings_binary":
+            dimensions = py_embedding_dimensions_packedbit
         index = asm.create_index(
             base_index_name + index, dimensions=dimensions, **options)
         print(f"Creating index {index.name}")
