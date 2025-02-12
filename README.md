@@ -1,6 +1,6 @@
 # Vector Optimization AI Search
 
-This project provides a pipeline for processing text data, generating embeddings using various models, and indexing the data in Azure Search for efficient retrieval.
+As Generative AI usage increases, leveraging meaningful data through RAG architecture is crucial for custom scenarios. Azure AI Search, despite its vector storage support, faces performance issues due to memory demands. This session covers vector compression via quantization and re-ranking through oversampling to optimize query performance, cost and search quality.
 
 
 ## Setup
