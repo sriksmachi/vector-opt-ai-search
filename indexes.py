@@ -1,14 +1,8 @@
 
 indexes_config = {
     "baseline": {},
-    "scalar-compression": {
-        "use_scalar_compression": True
-    },
     "binary-compression": {
         "use_binary_compression": True
-    },
-    "narrow": {
-        "use_float16": True
     },
     "no-stored": {
         "use_stored": False

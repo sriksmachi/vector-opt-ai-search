@@ -14,7 +14,7 @@ from indexes import indexes_config
 load_dotenv(override=True)
 azure_openai_embedding_dimensions = 3072
 hf_embedding_dimensions = 384
-py_embedding_dimensions = 1024
+py_embedding_dimensions = 384
 py_embedding_dimensions_packedbit = 3072
 
 # Load environment variables
