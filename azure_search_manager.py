@@ -52,8 +52,9 @@ def create_index(index_name, dimensions,
         SimpleField(name="id", type=SearchFieldDataType.String,
                     key=True, sortable=True, filterable=True),
         SearchField(name="title", type=SearchFieldDataType.String),
-        SearchField(name="chunk", type=SearchFieldDataType.String),
-        SearchField(name="embedding", type=vector_type, searchable=True, stored=use_stored,
+        SearchField(name="content", type=SearchFieldDataType.String),
+        SearchField(name="metadata", type=SearchFieldDataType.String),
+        SearchField(name="content_vector", type=vector_type, searchable=True, stored=use_stored,
                     vector_search_dimensions=dimensions,
                     vector_search_profile_name="myHnswProfile",
                     vector_encoding_format=(
@@ -139,7 +140,7 @@ def create_index(index_name, dimensions,
         name="my-semantic-config",
         prioritized_fields=SemanticPrioritizedFields(
             title_field=SemanticField(field_name="title"),
-            content_fields=[SemanticField(field_name="chunk")]
+            content_fields=[SemanticField(field_name="content")]
         )
     )
     semantic_search = SemanticSearch(configurations=[semantic_config])

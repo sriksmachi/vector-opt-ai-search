@@ -113,8 +113,8 @@ def get_chunks(text, chunk_size=20000, index_name="azure_openai"):
         documents.append({
             "id": str(uuid.uuid4()),
             "title": f"chunk-{i}",
-            "chunk": chunk,
-            "embedding": embeddings
+            "content": chunk,
+            "content_vector": embeddings
         })
 
     with open(f"{vectors_folder}/{index_name}.json", "w") as f:
